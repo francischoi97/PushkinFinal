@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import java.io.ByteArrayOutputStream;
 import android.widget.ArrayAdapter;
@@ -44,7 +46,7 @@ public class Chat extends AppCompatActivity {
     EditText editText;
     String username = "Shmoney";
 
-    static final String FILE_NAME = "messageData.txt";
+    static final String FILE_NAME = "messageDater.txt";
 
     public String readFile(){
         String returnable = "";
@@ -62,13 +64,16 @@ public class Chat extends AppCompatActivity {
         catch (IOException e) {
             e.printStackTrace();
         }
-        if(returnable == "")
+        if(returnable.equals(""))
         {
             System.out.println("Returnable is empty. Writing dummy data to file");
-            writeToFile("Robert;Hey there John. Want to hang out?;Monday at 12:02PM.\n");
+            writeToFile("to;Robert;Hey there John. Want to hang out?;Monday at 12:02PM.\n");
             //okay we wrote to the file, now call ourselves again, re-read the file...
             readFile();
             //and then the below return will occur.
+        }
+        else{
+            System.out.print("Returnable is no longer empty. Returning");
         }
         return returnable;
     }
@@ -88,38 +93,66 @@ public class Chat extends AppCompatActivity {
         }
     }
 
+    public void updateAdapter(){
+        data = new ArrayList<String>();
+
+        //Read the file with our data
+        String readMessages = readFile();
+
+        //Create the arrayList of that data
+        String[] lines = readMessages.split("\\n");
+        for (String i:lines){
+            data.add(i);
+        }
+
+        //Create the adapter with this new info
+        mAdapter = new CustomAdapter<String>(this, R.layout.activity_listview, R.id.listview, data);
+        ListView listView = (ListView)findViewById(R.id.listview);
+        listView.setAdapter(mAdapter);
+
+        //Set the view of this adapter to the bottom
+        listView.setSelection(listView.getCount() - 1);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        data = new ArrayList<String>();
-
-        String readMessages = readFile();
-
-        String[] lines = readMessages.split("\\n");
-        for (String i:lines){
-            System.out.println("Here you go " + i);
-            data.add(i);}
-
-        mAdapter = new CustomAdapter<String>(this, R.layout.activity_listview, R.id.listview, data);
-        ListView listView = (ListView)findViewById(R.id.listview);
-        listView.setAdapter(mAdapter);
+        updateAdapter();
 
         editText = (EditText)findViewById(R.id.messagebox);
 
-        Button sendButton = (Button)findViewById(R.id.sendbutton);
+        final Button sendButton = (Button)findViewById(R.id.sendbutton);
         sendButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 sendMessage();
+                //hide the keyboard
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(sendButton.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+
             }
         });
+
     }
 
     public void sendMessage() {
-        String s = username + ";" + editText.getText() + ";" + getTime() + "\n";
+        String curFile = readFile();
+        String[] barsArr = curFile.split("\\n");
+        String bars = barsArr[barsArr.length - 1].split(";")[0];
+        System.out.println("Bars is " + bars);
+        if(bars.equals("to")){
+            System.out.println("Storing as [from]");
+            bars = "from";
+        }
+        else{
+            System.out.println("Storing as [to]");
+            bars = "to";
+        }
+        String s = bars + ";" + username + ";" + editText.getText() + ";" + getTime() + "\n";
         writeToFile(s); //write this message to file...
+        updateAdapter();
         System.out.println("STORED LOCALLY");
     }
 
@@ -133,24 +166,46 @@ public class Chat extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             // Get the data item for this position
             String s = getItem(position);
-            // Check if an existing view is being reused, otherwise inflate the view
-            if (convertView == null) {
+            //System.out.println(s);
+            System.out.println("The thing is [" + s + "]");
+            if(s.split(";")[0].equals("to"))
+            {
+                System.out.println("Inflating view to [to]");
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.activity_listview, parent, false);
+
+
+                // Lookup view for data population
+                TextView username = (TextView) convertView.findViewById(R.id.username);
+                TextView textMessage = (TextView) convertView.findViewById(R.id.textmessage);
+                TextView timeStamp = (TextView) convertView.findViewById(R.id.timestamp);
+                // Populate the data into the template view using the data object
+                username.setText(s.split(";")[1]);
+                textMessage.setText(s.split(";")[2]);
+                timeStamp.setText(s.split(";")[3]);
+
+                username.setTextColor(Color.RED);
+                textMessage.setTextColor(Color.GREEN);
+                timeStamp.setTextColor(Color.GRAY);
+
             }
-            // Lookup view for data population
-            TextView username = (TextView) convertView.findViewById(R.id.username);
-            TextView textMessage = (TextView) convertView.findViewById(R.id.textmessage);
-            TextView timeStamp = (TextView) convertView.findViewById(R.id.timestamp);
-            // Populate the data into the template view using the data object
-            username.setText(s.split(";")[0]);
-            textMessage.setText(s.split(";")[1]);
-            timeStamp.setText(s.split(";")[2]);
+            else{
+                //from
+                System.out.println("Inflating view to [from]");
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.activity_listview_from, parent, false);
 
+                // Lookup view for data population
+                TextView username = (TextView) convertView.findViewById(R.id.username);
+                TextView textMessage = (TextView) convertView.findViewById(R.id.textmessage);
+                TextView timeStamp = (TextView) convertView.findViewById(R.id.timestamp);
+                // Populate the data into the template view using the data object
+                username.setText(s.split(";")[1]);
+                textMessage.setText(s.split(";")[2]);
+                timeStamp.setText(s.split(";")[3]);
 
-            username.setTextColor(Color.RED);
-            textMessage.setTextColor(Color.BLACK);
-            timeStamp.setTextColor(Color.GRAY);
-
+                username.setTextColor(Color.BLUE);
+                textMessage.setTextColor(Color.BLACK);
+                timeStamp.setTextColor(Color.GRAY);
+            }
             // Return the completed view to render on screen
             return convertView;
         }
