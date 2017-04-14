@@ -135,6 +135,15 @@ public class Chat extends AppCompatActivity {
             }
         });
 
+        final Button settings = (Button)findViewById(R.id.button);
+        settings.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(Chat.this, Settings.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     public void sendMessage() {
@@ -191,7 +200,7 @@ public class Chat extends AppCompatActivity {
             else{
                 //from
                 System.out.println("Inflating view to [from]");
-                convertView = LayoutInflater.from(getContext()).inflate(R.layout.activity_listview_from, parent, false);
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.activity_listview, parent, false);
 
                 // Lookup view for data population
                 TextView username = (TextView) convertView.findViewById(R.id.username);

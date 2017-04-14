@@ -36,5 +36,17 @@
         android:layout_width="90dp"
         android:layout_height="45dp" />
 
+    <Button
+        android:text="TempSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:id="@+id/button"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentRight="true" />
+
 
 </RelativeLayout>
