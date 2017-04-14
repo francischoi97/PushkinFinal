@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "261422606108",
+    "project_id": "pushkinfinal"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261422606108:android:5f1099829ab92e1a",
+        "android_client_info": {
+          "package_name": "com.pushkin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "261422606108-fb7hu4e9d3j70q7m42g7a93vo0lm0l80.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pushkin",
+            "certificate_hash": "48104ebb7d1bcc45a447221b8923f12083b4f7c2"
+          }
+        },
+        {
+          "client_id": "261422606108-pmhrkknsknpe19v1jg3sfj7tgue3qi47.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFPUfOeVE6jXi1SgpeftGV07Mhh--WVGA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
