@@ -95,7 +95,7 @@ public class Settings extends AppCompatActivity {
         kintactsNumber.setText("Number of Kintacts: "+kintactsNum);
 
         name.setText("Joey");
-        username.setText("manwhoami");
+        username.setText("Tim");
     }
 
     private void addDataSet(PieChart pieChart) {
