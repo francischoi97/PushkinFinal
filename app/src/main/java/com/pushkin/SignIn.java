@@ -43,6 +43,7 @@ public class SignIn extends AppCompatActivity implements
     protected GoogleSignInOptions gso;
     private ConnectionResult mConnectionResult;
     private SignInButton signInButton;
+    private Button disconnectButton;
     private Button submitButton;
 
     private ProgressDialog mProgressDialog;
@@ -59,6 +60,8 @@ public class SignIn extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
 
+        Intent i = new Intent(this, RegistrationService.class);
+        startService(i);
 
         path = getApplicationContext().getFilesDir();
         file = new File(path, "user_info.txt");
@@ -81,7 +84,19 @@ public class SignIn extends AppCompatActivity implements
         signInButton = (SignInButton) findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
 
-        findViewById(R.id.sign_out_button).setOnClickListener(this);
+        disconnectButton = (Button) findViewById(R.id.sign_out_and_disconnect_button);
+
+        disconnectButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                switch(v.getId()) {
+                    case R.id.sign_out_and_disconnect_button:
+                        revokeAccess();
+                        break;
+                }
+            }
+        });
+
+        //findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.sign_out_and_disconnect_button).setOnClickListener(this);
 
         submitButton = (Button) findViewById(R.id.submit_button);
@@ -301,9 +316,9 @@ public class SignIn extends AppCompatActivity implements
             case R.id.sign_in_button:
                 signIn();
                 break;
-            case R.id.sign_out_button:
-                signOut();
-                break;
+//            case R.id.sign_out_button:
+//                signOut();
+//                break;
             case R.id.sign_out_and_disconnect_button:
                 revokeAccess();
                 break;
