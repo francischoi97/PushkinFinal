@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Harith on 04/08/17.
  */
@@ -27,6 +30,7 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
     private static final String KEY_MESSAGES_SENT = "MessagesSent";
     private static final String KEY_MESSAGES_RECEIVED = "MessagesReceived";
     private static final String KEY_TOTAL_POINTS = "TotalPoints";
+    private static final String KEY_IMAGE_URL = "ImageURL";
 
     //variables for Chat table. This is a table that contains all messages
     private static final String CHAT = "Chat";
@@ -38,14 +42,14 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
 
     //Conversations table name
     private static final String CONVERSATIONS_NAME = "create table Conversations (" + KEY_USERNAME + " text not null, " +
-            KEY_Chat_ID + " int PRIMARY KEY AUTOINCREMENT DEFAULT 1, " + KEY_FIRST_NAME + " text not null, " +
+            KEY_Chat_ID + " INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT 1, " + KEY_FIRST_NAME + " text not null, " +
             KEY_LAST_NAME + " text not null, " + KEY_LAST_ACTIVE + " text, " + KEY_MESSAGES_SENT + " int, " +
-            KEY_MESSAGES_RECEIVED + " int, " + KEY_TOTAL_POINTS + " float )";
+            KEY_MESSAGES_RECEIVED + " int, " + KEY_TOTAL_POINTS + " float, " + KEY_IMAGE_URL + " text not null)";
 
     //Chat table name
     private static final String CHAT_NAME = "create table "+ CHAT + " (" + KEY_TIME + " text not null, " + KEY_TEXT + " text not null, " +
-            KEY_SENDER + " text not null, " + KEY_MESSAGE_NUMBER + " int PRIMARY KEY AUTOINCREMENT DEFAULT 1, " +
-            KEY_POINTS_EARNED_BY_THIS_MESSAGE + " int DEFAULT 0 " + KEY_Chat_ID + " INTEGER not null)";
+            KEY_SENDER + " text not null, " + KEY_MESSAGE_NUMBER + " INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT 1, " +
+            KEY_POINTS_EARNED_BY_THIS_MESSAGE + " int DEFAULT 0, " + KEY_Chat_ID + " int)";
 
     public PushkinDatabaseHelper(Context context) {
         super(context, database_name, null, database_version);
@@ -167,5 +171,57 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
     //some method to compute the number of points a certain message gets you
     public static float computeNumberOfPoints () {
         return 0;
+    }
+
+    public void populate() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        db.execSQL("delete from Conversations");
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_FIRST_NAME, "Sean");
+        values.put(KEY_LAST_NAME, "Fitzgerald");
+        values.put(KEY_LAST_ACTIVE, "5:40PM");
+        values.put(KEY_IMAGE_URL, "http://cdnak1.psbin.com/img/mw=160/mh=210/cr=n/d=m3gxg/ogoeh4en6evdh5zp.jpg");
+        values.put(KEY_MESSAGES_SENT, 5);
+        values.put(KEY_MESSAGES_RECEIVED, 0);
+        values.put(KEY_USERNAME, "sFitz");
+        values.put(KEY_TOTAL_POINTS, 5.5);
+
+        db.insert(CONVERSATIONS, null, values);
+
+        values.put(KEY_FIRST_NAME, "Francis");
+        values.put(KEY_LAST_NAME, "Choi");
+        values.put(KEY_LAST_ACTIVE, "4:20PM");
+        values.put(KEY_IMAGE_URL, "http://www.photographybysandy.co.uk/img/s/v-3/p442493958-3.jpg");
+        values.put(KEY_MESSAGES_SENT, 3);
+        values.put(KEY_MESSAGES_RECEIVED, 2);
+        values.put(KEY_USERNAME, "fChoi");
+        values.put(KEY_TOTAL_POINTS, 3.0);
+
+        db.insert(CONVERSATIONS, null, values);
+    }
+
+    public ArrayList<ConversationPreview> getConversationPreviews() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("select FirstName, LastName, LastActive, TotalPoints, ImageURL from Conversations", null);
+//        System.out.println (c);
+        ArrayList<ConversationPreview> list = new ArrayList<ConversationPreview>();
+        if (c.moveToFirst()) {
+            for (int i = 0; i<c.getCount(); i++) {
+                String fname = c.getString(c.getColumnIndex(KEY_FIRST_NAME));
+                String lname = c.getString(c.getColumnIndex(KEY_LAST_NAME));
+                String lastActive = c.getString(c.getColumnIndex(KEY_LAST_ACTIVE));
+                float points = c.getFloat(c.getColumnIndex(KEY_TOTAL_POINTS));
+                String imageURL = c.getString(c.getColumnIndex(KEY_IMAGE_URL));
+
+                ConversationPreview cp = new ConversationPreview(fname, lname, lastActive, imageURL, points);
+                list.add(cp);
+
+                c.moveToNext();
+            }
+        }
+        System.out.println ("getPreviews Size is " + list.size());
+        return list;
     }
 }
