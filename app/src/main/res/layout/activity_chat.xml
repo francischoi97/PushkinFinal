@@ -14,39 +14,27 @@
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:id="@+id/listview"
-        android:layout_alignParentTop="true" />
+        android:layout_above="@+id/messagebox" />
 
     <EditText
         android:layout_height="wrap_content"
         android:id="@+id/messagebox"
-        android:layout_below="@+id/listview"
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/sendbutton"
         android:layout_width="260dp"
         android:layout_marginRight="10dp" />
-
-    <Button
-        android:id="@+id/drawbutton"
-        android:layout_width="50dp"
-        android:layout_height="45dp"
-        android:text="Draw" />
 
     <Button
         android:id="@+id/sendbutton"
         android:color="#8b7765"
         android:textColor="#fffafa"
         android:text="Send"
-        android:layout_toRightOf="@+id/messagebox"
-        android:layout_below="@+id/listview"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_width="90dp"
         android:layout_height="45dp" />
 
-    <com.pushkin.DrawingView
-        android:id="@+id/drawingview"
-        android:layout_width="400dp"
-        android:layout_height="300dp"
-        android:layout_below="@+id/messagebox" />
-
 
 </RelativeLayout>
-
