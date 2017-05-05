@@ -151,8 +151,8 @@ public class MainConversationView extends AppCompatActivity {
 
         // name, website
 //        txtName = (TextView) navigationView.getHeaderView(0).findViewById(R.id.name);
-        txtName.setText("Noah Orlando");
-        txtWebsite.setText("norlando19@amherst.edu");
+        txtName.setText("John Smith");
+        txtWebsite.setText("jsmith@yahoo.com");
 
 //         loading header background image
         Glide.with(this).load(urlNavHeaderBg)
