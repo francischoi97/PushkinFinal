@@ -36,7 +36,7 @@ public class ConversationsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private static PushkinDatabaseHelper dbHelper;
+    public static PushkinDatabaseHelper dbHelper;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
