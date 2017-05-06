@@ -6,11 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.pushkin.other.CircleTransform;
+import com.pushkin.other.ListViewClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +37,9 @@ public class PushkinAdapter extends ArrayAdapter<ConversationPreview> {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.conversation_preview, parent, false);
         }
+
+        RelativeLayout layout = (RelativeLayout) convertView.findViewById(R.id.layout);
+        layout.setOnClickListener(new ListViewClickListener(item.getChatID()));
 
         ImageView pic = (ImageView) convertView.findViewById(R.id.pic);
 

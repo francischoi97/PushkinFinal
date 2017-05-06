@@ -200,11 +200,12 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
         values.put(KEY_TOTAL_POINTS, 3.0);
 
         db.insert(CONVERSATIONS, null, values);
+
     }
 
     public ArrayList<ConversationPreview> getConversationPreviews() {
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor c = db.rawQuery("select FirstName, LastName, LastActive, TotalPoints, ImageURL from Conversations", null);
+        Cursor c = db.rawQuery("select FirstName, LastName, LastActive, TotalPoints, ImageURL, CHAT_ID from Conversations", null);
 //        System.out.println (c);
         ArrayList<ConversationPreview> list = new ArrayList<ConversationPreview>();
         if (c.moveToFirst()) {
@@ -214,8 +215,9 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
                 String lastActive = c.getString(c.getColumnIndex(KEY_LAST_ACTIVE));
                 float points = c.getFloat(c.getColumnIndex(KEY_TOTAL_POINTS));
                 String imageURL = c.getString(c.getColumnIndex(KEY_IMAGE_URL));
+                int chatID = c.getInt(c.getColumnIndex(KEY_Chat_ID));
 
-                ConversationPreview cp = new ConversationPreview(fname, lname, lastActive, imageURL, points);
+                ConversationPreview cp = new ConversationPreview(fname, lname, lastActive, imageURL, points, chatID);
                 list.add(cp);
 
                 c.moveToNext();
@@ -223,5 +225,21 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
         }
         System.out.println ("getPreviews Size is " + list.size());
         return list;
+    }
+
+    public ArrayList<String> getMessages (int chatID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("select Text from Chat where CHAT_ID = ?", new String[] {chatID+""});
+        ArrayList<String> messages = new ArrayList<String>();
+
+//        System.out.println(c);
+        if (c.moveToFirst()) {
+            for (int i = 0; i<c.getCount(); i++) {
+                messages.add(c.getString(c.getColumnIndex("Text")));
+                c.moveToNext();
+            }
+        }
+        System.out.println(messages);
+        return messages;
     }
 }

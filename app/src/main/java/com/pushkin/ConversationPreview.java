@@ -11,12 +11,14 @@ public class ConversationPreview {
     private String lastActive;
     private String imageURL;
     private float points;
+    private int chatID;
 
-    public ConversationPreview (String fname, String lname, String lastActive, String imageURL, float points) {
+    public ConversationPreview (String fname, String lname, String lastActive, String imageURL, float points, int chatID) {
         name = fname + " " + lname;
         this.lastActive = lastActive;
         this.imageURL = imageURL;
         this.points = points;
+        this.chatID = chatID;
     }
 
     public String getName() {
@@ -33,6 +35,10 @@ public class ConversationPreview {
 
     public float getPoints() {
         return points;
+    }
+
+    public int getChatID() {
+        return chatID;
     }
 
     public String toString() {
