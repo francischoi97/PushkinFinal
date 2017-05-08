@@ -115,11 +115,11 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
         //query the database to check whether a conversation with the given username exists
         Cursor c = db.rawQuery("SELECT Username from " + CONVERSATIONS + " WHERE Username = ?", new String[] {username});
         try{
-        if (c.moveToFirst()) {
-            if (c.getString(c.getColumnIndex("Username")).equals(username)) {
-                return true;
-            }
-        }}
+            if (c.moveToFirst()) {
+                if (c.getString(c.getColumnIndex("Username")).equals(username)) {
+                    return true;
+                }
+            }}
         finally {
             // this gets called even if there is an exception somewhere above
             if(c != null)
@@ -351,21 +351,21 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
 //        System.out.println (c);
         ArrayList<ConversationPreview> list = new ArrayList<ConversationPreview>();
         try{
-        if (c.moveToFirst()) {
-            for (int i = 0; i < c.getCount(); i++) {
-                String fname = c.getString(c.getColumnIndex(KEY_FIRST_NAME));
-                String lname = c.getString(c.getColumnIndex(KEY_LAST_NAME));
-                String lastActive = c.getString(c.getColumnIndex(KEY_LAST_ACTIVE));
-                String lastMessage = c.getString(c.getColumnIndex(KEY_LAST_MESSAGE));
-                String imageURL = c.getString(c.getColumnIndex(KEY_IMAGE_URL));
-                int chatID = c.getInt(c.getColumnIndex(KEY_Chat_ID));
+            if (c.moveToFirst()) {
+                for (int i = 0; i < c.getCount(); i++) {
+                    String fname = c.getString(c.getColumnIndex(KEY_FIRST_NAME));
+                    String lname = c.getString(c.getColumnIndex(KEY_LAST_NAME));
+                    String lastActive = c.getString(c.getColumnIndex(KEY_LAST_ACTIVE));
+                    String lastMessage = c.getString(c.getColumnIndex(KEY_LAST_MESSAGE));
+                    String imageURL = c.getString(c.getColumnIndex(KEY_IMAGE_URL));
+                    int chatID = c.getInt(c.getColumnIndex(KEY_Chat_ID));
 
-                ConversationPreview cp = new ConversationPreview(fname, lname, lastActive, imageURL, lastMessage, chatID);
-                list.add(cp);
+                    ConversationPreview cp = new ConversationPreview(fname, lname, lastActive, imageURL, lastMessage, chatID);
+                    list.add(cp);
 
-                c.moveToNext();
-            }
-        }}
+                    c.moveToNext();
+                }
+            }}
         finally {
             // this gets called even if there is an exception somewhere above
             if(c != null)
@@ -382,16 +382,16 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
 
 //        System.out.println(c);
         try{
-        if (c.moveToFirst()) {
-            for (int i = 0; i<c.getCount(); i++) {
-                String text = c.getString(c.getColumnIndex("Text"));
-                String sender = c.getString(c.getColumnIndex("Sender"));
-                String time = c.getString(c.getColumnIndex("Time"));
-                MessageView v = new MessageView(sender,text,time);
-                messages.add(v);
-                c.moveToNext();
-            }
-        }}
+            if (c.moveToFirst()) {
+                for (int i = 0; i<c.getCount(); i++) {
+                    String text = c.getString(c.getColumnIndex("Text"));
+                    String sender = c.getString(c.getColumnIndex("Sender"));
+                    String time = c.getString(c.getColumnIndex("Time"));
+                    MessageView v = new MessageView(sender,text,time);
+                    messages.add(v);
+                    c.moveToNext();
+                }
+            }}
         finally {
             // this gets called even if there is an exception somewhere above
             if(c != null)
@@ -420,18 +420,18 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
 
     public String getLastName (int chatID) {
         SQLiteDatabase db = this.getWritableDatabase();
-           Cursor c = db.rawQuery("select LastName from Conversations where CHAT_ID =?", new String[]{chatID + ""});
-    try{
-           if (c.moveToFirst()) {
-               return c.getString(c.getColumnIndex("LastName"));
-           }
-           return null;
-       }
-       finally {
-           // this gets called even if there is an exception somewhere above
-           if(c != null)
-               c.close();
-       }
+        Cursor c = db.rawQuery("select LastName from Conversations where CHAT_ID =?", new String[]{chatID + ""});
+        try{
+            if (c.moveToFirst()) {
+                return c.getString(c.getColumnIndex("LastName"));
+            }
+            return null;
+        }
+        finally {
+            // this gets called even if there is an exception somewhere above
+            if(c != null)
+                c.close();
+        }
     }
 
     //returns Username of Conversant
@@ -453,7 +453,7 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
 
     //add details to My_Table
     public void addInfo (String username, String fName, String lName, String imageURL, String token, String email,
-                         String backgroundImage) {
+                         String backgroundImage, String privateKey) {
         ContentValues values = new ContentValues();
         values.put(KEY_USERNAME, username);
         values.put(KEY_FIRST_NAME, fName);
