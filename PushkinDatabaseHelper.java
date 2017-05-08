@@ -580,4 +580,23 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
         }
     }
 
+    //get a certain Kintact's chatID
+    public int getChatID (String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        Cursor c = db.rawQuery("select " + KEY_Chat_ID + " from " + KINTACTS + " where " + KEY_USERNAME + " =?",
+                new String[] {username});
+        try {
+            if (c.moveToFirst()){
+                return c.getInt(c.getColumnIndex(KEY_Chat_ID));
+            }
+        }
+        finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+        return -1;
+    }
+
 }
