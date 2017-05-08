@@ -547,7 +547,37 @@ public class PushkinDatabaseHelper extends SQLiteOpenHelper{
     }
 
     //create conversation for kintact if not already here
-    public void addConversationKintact(String username) {
-
+    public void addConversationKintact (String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor c = db.rawQuery("select * from " + CONVERSATIONS + " where " + KEY_USERNAME + " =?", new String[] {username});
+        try {
+            if (c.moveToFirst()) {
+                //do nothing
+            } else {
+                //get Kintact
+                Cursor d = db.rawQuery("select * from " + KINTACTS + " where " + KEY_USERNAME +
+                        " =?", new String[]{username});
+                try {
+                    if (d.moveToFirst()) {
+                        ContentValues values = new ContentValues();
+                        values.put(KEY_USERNAME, d.getString(d.getColumnIndex(KEY_USERNAME)));
+                        values.put(KEY_FIRST_NAME, d.getString(d.getColumnIndex(KEY_FIRST_NAME)));
+                        values.put(KEY_LAST_NAME, d.getString(d.getColumnIndex(KEY_LAST_NAME)));
+                        values.put(KEY_CHATTER, getKeyUsername());
+                        values.put(KEY_IMAGE_URL, d.getString(d.getColumnIndex(KEY_IMAGE)));
+                        db.insert(CONVERSATIONS, null, values);
+                    }
+                }
+                finally {
+                    d.close();
+                }
+            }
+        }
+        finally {
+            if (c!= null) {
+                c.close();
+            }
+        }
     }
+
 }
