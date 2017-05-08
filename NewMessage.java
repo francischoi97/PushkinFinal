@@ -25,9 +25,9 @@ import java.util.List;
 public class NewMessage extends AppCompatActivity {
 
     private EditText searchTo;
-    private PushkinAdapter mAdapter;
-    private ArrayList<ConversationPreview> data;
-    //private ArrayList<KintactPreview> data;
+    private KintactAdapter mAdapter;
+    //private ArrayList<ConversationPreview> data;
+    private ArrayList<Kintact> data;
     private ListView listView;
 
     private PushkinDatabaseHelper dbHelper;
@@ -36,20 +36,18 @@ public class NewMessage extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.activity_newmessage);
+        this.setContentView(R.layout.activity_new_message);
 
         dbHelper = MainActivity.dbHelper;
 
         searchTo = (EditText)findViewById(R.id.searchto);
 
-        data = dbHelper.getConversationPreviews();
-        //data = dbHelper.getKintactPreviews();
-
-        //Populate data from server
+        data = dbHelper.getKintacts();
+        System.out.println(data.size());
 
         listView = (ListView)findViewById(R.id.list);
 
-        mAdapter = new PushkinAdapter(this, R.id.recipient, data);
+        mAdapter = new KintactAdapter(this, R.id.pic, data);
 
         listView.setAdapter(mAdapter);
 
@@ -76,7 +74,8 @@ public class NewMessage extends AppCompatActivity {
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                searchTo.setText(mAdapter.getItem(position).getName());
+                Kintact kintact = mAdapter.getItem(position);
+                searchTo.setText(kintact.getfName() + " " + kintact.getlName());
 
             }
         });
