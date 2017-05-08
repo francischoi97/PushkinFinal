@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -37,7 +38,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.pushkin.activity.MainActivity;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,10 +55,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -67,7 +71,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
      */
     private static final int REQUEST_READ_CONTACTS = 0;
 
-
+    public static PushkinDatabaseHelper dbHelper;
     private UserLoginTask mAuthTask = null;
 
     // UI references.
@@ -79,30 +83,20 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        dbHelper = new PushkinDatabaseHelper(this);
         Intent i = new Intent(this, RegistrationService.class);
         startService(i);
 
         String returnable = "";
         boolean tokenGood = true;
-        try {
-            FileInputStream fIn;
-            fIn = openFileInput("userToken.dat");
-            int n;
-            while((n = fIn.read()) != -1) {
-                returnable = returnable + Character.toString((char)n);
-
-            }
-            fIn.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
+        //CHECK IF TOKEN EXISTS HERE
+        if(dbHelper.getKeyToken() == null){
             tokenGood = false;
         }
 
         if(tokenGood){
             //we have a token, we do not even need to authenticate with it, just bring them to the main convo page.
-            startActivity(new Intent(Login.this, MainConversationView.class));
+            startActivity(new Intent(Login.this, MainActivity.class));
         }
         else {
 
@@ -111,7 +105,6 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
             // Set up the login form.
             mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-            populateAutoComplete();
 
             mPasswordView = (EditText) findViewById(R.id.password);
             mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -135,49 +128,6 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
             mLoginFormView = findViewById(R.id.login_form);
             mProgressView = findViewById(R.id.login_progress);
-        }
-    }
-
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
         }
     }
 
@@ -327,6 +277,18 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
         int IS_PRIMARY = 1;
     }
 
+    public KeyPair generateKeys() {
+        KeyPair keyPair = null;
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+            keyGen.initialize(1024);            // initialize key generator
+            keyPair = keyGen.generateKeyPair(); // generate pair of keys
+        } catch(GeneralSecurityException e) {
+            System.out.println(e);
+        }
+        return keyPair;
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -343,7 +305,6 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
             String registrationToken = "";
             try {
                 FileInputStream fIn;
@@ -360,10 +321,17 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             }
             System.out.println("We read this token!!!!!!!!!!!!!!!" + registrationToken);
 
+            //generate UNIQUE KEY PAIR
+            KeyPair keyPair = generateKeys();
+            byte[] publicKey = keyPair.getPublic().getEncoded();
+            byte[] privateKey = keyPair.getPrivate().getEncoded();
+            String privKey = Base64.encodeToString(privateKey, Base64.NO_WRAP); //dont add new line
+            String pubKey = Base64.encodeToString(publicKey, Base64.NO_WRAP);
+
             HttpURLConnection harpoon;
             String url = "http://148.85.240.18:8080/login";
             String result = null;
-            String thing = "{\"username\":\"" + mEmail + "\",\"password\":\"" + mPassword + "\",\"pKey\":\"123\",\"fcmToken\":\"" + registrationToken + "\"}";
+            String thing = "{\"username\":\"" + mEmail + "\",\"password\":\"" + mPassword + "\",\"pKey\":\"" + pubKey + "\",\"fcmToken\":\"" + registrationToken + "\"}";
 
             try {
                 //Connect
@@ -403,14 +371,46 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
                 }
                 //else, we are good, get token and store it...
                 String token = json.getString("AuthToken");
+                String email = json.getString("email");
+                String headerPic = json.getString("headerPic");
+                String proPic = json.getString("proPic");
+                String firstName = json.getString("firstName");
+                String lastName = json.getString("lastName");
+
+                JSONArray pKeys = json.getJSONArray("pKeys");
+                String pKeyStringToWrite = "";
+                //System.out.println("LENGTH OF KEYBAG " + pKeys.length());
+                for (int i = 0; i < pKeys.length() - 1; i++) { //dont know why we're getting one extra json value :/
+                    JSONObject each = pKeys.getJSONObject(i);
+                    System.out.println(each.toString());
+                    String sender = each.getString("username");
+                    String text = each.getString("key"); //we need to decode this.
+                    pKeyStringToWrite += sender + ":" + text + "\n";
+                }
+                System.out.println("Our keybag: " + pKeyStringToWrite);
+
+
                 try {
-                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(openFileOutput("userToken.dat", Context.MODE_PRIVATE));
-                    outputStreamWriter.write(token);
-                    outputStreamWriter.close();
+                    dbHelper.addInfo(mEmail,firstName,lastName,proPic,token,email,headerPic, privKey);
+/*                    OutputStreamWriter userToken = new OutputStreamWriter(openFileOutput("userToken.dat", Context.MODE_PRIVATE));
+                    userToken.write(mEmail + ":" + token + ":" + privKey);
+                    userToken.close();*/
+                }
+                catch (Exception e) {
+                    Log.e("Exception", "File write failed: " + e.toString());
+                }
+
+                //THIS KEYBAG WILL COME WITH KINTACTS ....
+                try {
+                    OutputStreamWriter userToken = new OutputStreamWriter(openFileOutput("keybag.dat", Context.MODE_PRIVATE));
+                    userToken.write(pKeyStringToWrite);
+                    userToken.close();
                 }
                 catch (IOException e) {
                     Log.e("Exception", "File write failed: " + e.toString());
                 }
+
+                //NOW SUBMIT PKEY TO SERVER ...
                 return true;
 
             } catch (IOException e) {
@@ -428,7 +428,7 @@ public class Login extends AppCompatActivity implements LoaderCallbacks<Cursor> 
             showProgress(false);
 
             if (success) {
-                startActivity(new Intent(Login.this, MainConversationView.class));
+                startActivity(new Intent(Login.this, MainActivity.class));
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
